@@ -1,0 +1,24 @@
+Balancing Delivery with Quality
+========================================================
+
+```{r fig.width=12}
+library(MASS)
+
+cardeaths <- data.frame(Seatbelts[,1], Seatbelts[,5], Seatbelts[,6], Seatbelts[,8])
+colnames(cardeaths) <- c("DriversKilled", "DistanceDriven", "PriceofGas", "SeatbeltLaw")
+parcoord(cardeaths, col=rainbow(length(cardeaths[,1])), var.label=TRUE)
+
+
+tvFile <- "/Applications/MAMP/htdocs/teamvelocity.txt"
+teamvelocity <- read.table(tvFile, sep=",", header=TRUE)
+t<- data.frame(teamvelocity$Sprint, teamvelocity$TotalPoints, teamvelocity$TotalDevs, teamvelocity$BugBacklog, teamvelocity$BugsOpened, teamvelocity$ProductionIncidents)
+colnames(t) <- c("sprint", "points", "devs", "total bugs", "new bugs", "prod incidents")
+parcoord(t, col=rainbow(length(t[,1])), var.label=TRUE)
+```
+
+```{r fig.width=12}
+teFile <- "/Applications/MAMP/htdocs/teameffort.txt"
+teameffort <- read.table(teFile, sep=",", header=TRUE)
+
+parcoord(teameffort, col=rainbow(length(teameffort[,1])), var.label=TRUE, main="Level of Effort Spent")
+```

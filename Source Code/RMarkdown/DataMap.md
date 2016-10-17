@@ -1,0 +1,98 @@
+Visualizing Spatial Data from Access Logs
+========================================================
+
+
+
+
+
+```r
+library(maps)
+library(mapproj)
+
+logDataFile <- "/Applications/MAMP/htdocs/accessLogData.txt"
+logColumns <- c("IP", "date", "HTTPstatus", "country", "state", "city")
+logData <- read.table(logDataFile, sep = ",", col.names = logColumns)
+```
+
+
+
+
+
+
+
+```r
+# chart worldwide visit data
+
+# unfortunately there is no state.name equivalent for countries so we must
+# check the explicit country names.  In the us states below we are able to
+# accomplish this much more efficiently
+country <- unique(logData$country)
+country <- sapply(country, function(countryCode) {
+    # trim whitespaces from the country code
+    countryCode <- gsub("(^ +)|( +$)", "", countryCode)
+    if (countryCode == "US") {
+        countryCode <- "USA"
+    } else if (countryCode == "CN") {
+        countryCode <- "China"
+    } else if (countryCode == "CA") {
+        countryCode <- "Canada"
+    } else if (countryCode == "SE") {
+        countryCode <- "Sweden"
+    } else if (countryCode == "UA") {
+        countryCode <- "USSR"
+    }
+})
+
+
+countryMatch <- match.map("world", country)
+
+# color code any states with visit data as light blue
+colorCountry <- sapply(countryMatch, function(c) {
+    if (!is.na(c)) 
+        c <- "#C6DBEF" else c <- "#FFFFFF"
+})
+
+m <- map("world", plot = FALSE)
+map("world", proj = "azequalarea", orient = c(41, -74, 0), boundary = TRUE, 
+    col = colorCountry, fill = TRUE)
+map.grid(m, col = "blue", label = FALSE, lty = 2, pretty = FALSE)
+map.scale()
+```
+
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2.png) 
+
+
+
+
+
+
+```r
+# isolate the US data, scrub any unknown states
+usData <- logData[logData$state != "XX", ]
+usData$state <- apply(as.matrix(usData$state), 1, function(s) {
+    # trim the abbreviation of whitespaces
+    s <- gsub("(^ +)|( +$)", "", s)
+    s <- state.name[grep(s, state.abb)]
+})
+
+s <- map("state", plot = FALSE)
+states <- unique(usData$state)
+stateMatch <- match.map("state", states)
+
+# color code any states with visit data as light blue
+colorMatch <- sapply(stateMatch, function(s) {
+    if (!is.na(s)) 
+        s <- "#C6DBEF" else s <- "#FFFFFF"
+})
+
+
+map("state", resolution = 0, lty = 0, projection = "azequalarea", 
+    col = colorMatch, fill = TRUE)
+map("state", col = "black", fill = FALSE, add = TRUE, lty = 1, lwd = 1, 
+    projection = "azequalarea")
+map.scale()
+```
+
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3.png) 
+
+
